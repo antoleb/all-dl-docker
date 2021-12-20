@@ -1,1 +1,1 @@
-docker run --runtime=nvidia -it --net=host --ipc=host --name antodocker -e NVIDIA_VISIBLE_DEVICES=all -v /data/:/data/ antodocker jupyter notebook --no-browser --ip=0.0.0.0 --allow-root --NotebookApp.token='antoshka' --notebook-dir=/data --port=8777
+docker run --runtime=nvidia -it --net=host --ipc=host --name antodocker -e NVIDIA_VISIBLE_DEVICES=all -v /data/:/data/ all_al_docker jupyter notebook --no-browser --ip=0.0.0.0 --allow-root --NotebookApp.token='token' --notebook-dir=/data --port=8777

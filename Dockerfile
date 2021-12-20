@@ -1,4 +1,4 @@
-FROM nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
+FROM nvidia/cuda:11.4.2-cudnn8-runtime-ubuntu18.04
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
          wget  \
@@ -19,12 +19,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
          libpng-dev &&\
      rm -rf /var/lib/apt/lists/*
      
-RUN wget --quiet https://repo.anaconda.com/archive/Anaconda3-5.2.0-Linux-x86_64.sh -O ~/anaconda.sh && \
-    /bin/bash ~/anaconda.sh -b -p /opt/conda && \
-    rm ~/anaconda.sh && \
-    ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "conda activate base" >> ~/.bashrc
+ENV PATH="/root/miniconda3/bin:${PATH}"
+ARG PATH="/root/miniconda3/bin:${PATH}"
+
+RUN wget \
+    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && mkdir /root/.conda \
+    && bash Miniconda3-latest-Linux-x86_64.sh -b \
+    && rm -f Miniconda3-latest-Linux-x86_64.sh 
 
 ENV PATH /opt/conda/bin:$PATH
 
@@ -32,15 +34,25 @@ WORKDIR /libs/
 
 RUN conda install numpy pyyaml mkl mkl-include setuptools cmake cffi typing
 RUN conda install -c mingfeima mkldnn
-RUN conda install -c pytorch magma-cuda90
-
-RUN git clone --recursive https://github.com/pytorch/pytorch
-WORKDIR /libs/pytorch
-RUN python setup.py install
+RUN conda install -c pytorch pytorch=1.9.1 torchvision cudatoolkit=10.2
+RUN conda install -c fvcore -c iopath -c conda-forge fvcore iopath
+RUN conda install -c bottler nvidiacub
+RUN pip install -U pytorch3d -f https://dl.fbaipublicfiles.com/pytorch3d/packaging/wheels/py39_cu102_pyt191/download.html
 
 RUN pip install -U \
         onnx-coreml \
         tensorboardX \
         tqdm \
-        imageio
+        imageio \
+        jupyter \
+        loguru \
+        k3d \
+        torchsummary \
+	tensorboard \
+	matplotlib \
+	cloudpickle \
+	boto3 
 
+
+RUN apt-get update && apt-get install -y ffmpeg libsm6 libxext6 
+RUN conda install -c open3d-admin -c conda-forge open3d
